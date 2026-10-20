@@ -1,0 +1,8 @@
+<resources>
+    <color name="primary">#246B52</color><color name="ink">#19382E</color>
+    <color name="muted">#63736A</color><color name="canvas">#F5F7F3</color>
+    <color name="surface">#FFFFFF</color><color name="line">#E2E8E1</color>
+    <color name="mint">#E7F0E8</color><color name="sand">#FBF0DE</color>
+    <color name="amber">#9A6423</color><color name="danger">#B34336</color>
+    <color name="black">#FF000000</color><color name="white">#FFFFFFFF</color>
+</resources>

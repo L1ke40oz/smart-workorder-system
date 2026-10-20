@@ -1,0 +1,33 @@
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="24dp" android:orientation="vertical">
+        <com.google.android.material.button.MaterialButton android:id="@+id/back" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/back" />
+        <TextView android:id="@+id/number" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:textIsSelectable="true" />
+        <TextView android:id="@+id/title" style="@style/Text.Workorder.Title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" />
+        <TextView android:id="@+id/status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:background="@drawable/bg_badge" android:textColor="@color/primary" android:textSize="14sp" />
+        <TextView android:id="@+id/message" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:accessibilityLiveRegion="polite" />
+        <LinearLayout android:id="@+id/details" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <TextView android:id="@+id/timeline" style="@style/Text.Workorder.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="20dp" android:background="@drawable/bg_card" />
+            <TextView style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="28dp" android:text="@string/original" />
+            <TextView android:id="@+id/original" style="@style/Text.Workorder.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="20dp" android:background="@drawable/bg_card" android:textIsSelectable="true" />
+            <TextView android:id="@+id/structured" style="@style/Text.Workorder.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:padding="20dp" android:background="@drawable/bg_card" />
+            <LinearLayout android:id="@+id/ragSection" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:padding="20dp" android:orientation="vertical" android:background="@drawable/bg_card" android:visibility="gone">
+                <TextView style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/knowledge_reference" />
+                <TextView style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/knowledge_explanation" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/loadSuggestions" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="14dp" android:text="@string/find_similar" />
+                <TextView android:id="@+id/ragMessage" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:accessibilityLiveRegion="polite" />
+                <LinearLayout android:id="@+id/cases" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                <TextView android:id="@+id/suggestion" style="@style/Text.Workorder.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:textIsSelectable="true" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/syncKnowledge" style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/sync_knowledge" />
+            </LinearLayout>
+            <TextView style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="28dp" android:text="@string/resolution" />
+            <TextView android:id="@+id/resolution" style="@style/Text.Workorder.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="20dp" android:background="@drawable/bg_card" android:textIsSelectable="true" />
+            <LinearLayout android:id="@+id/adminActions" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:orientation="vertical" android:visibility="gone">
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/resultLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/resolution_hint">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/resultInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:minLines="4" android:gravity="top" android:inputType="textMultiLine|textCapSentences" android:maxLength="5000" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/action" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="16dp" />
+            </LinearLayout>
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/refresh" style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/refresh" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

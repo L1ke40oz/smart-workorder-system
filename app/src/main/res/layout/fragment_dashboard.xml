@@ -1,0 +1,41 @@
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+        <TextView style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/brand_eyebrow" />
+        <TextView android:id="@+id/greeting" style="@style/Text.Workorder.Title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" />
+        <TextView android:id="@+id/subtitle" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:padding="24dp" android:orientation="vertical" android:background="@drawable/bg_hero">
+            <TextView android:id="@+id/heroLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#D7E5D9" android:textSize="13sp" />
+            <TextView android:id="@+id/heroTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="@color/white" android:textSize="25sp" android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/heroBody" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="#D7E5D9" android:textSize="14sp" android:lineSpacingExtra="5dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/primaryAction" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginTop="22dp" android:backgroundTint="@color/mint" android:textColor="@color/ink" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:orientation="horizontal" android:baselineAligned="false">
+            <LinearLayout android:id="@+id/pendingCard" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:padding="16dp" android:orientation="vertical" android:background="@drawable/bg_card">
+                <TextView android:id="@+id/pendingCount" style="@style/Text.Workorder.Title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" />
+                <TextView style="@style/Text.Workorder.Caption" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/pending" />
+            </LinearLayout>
+            <Space android:layout_width="10dp" android:layout_height="1dp" />
+            <LinearLayout android:id="@+id/processingCard" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:padding="16dp" android:orientation="vertical" android:background="@drawable/bg_card">
+                <TextView android:id="@+id/processingCount" style="@style/Text.Workorder.Title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" />
+                <TextView style="@style/Text.Workorder.Caption" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/processing" />
+            </LinearLayout>
+            <Space android:layout_width="10dp" android:layout_height="1dp" />
+            <LinearLayout android:id="@+id/completedCard" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:padding="16dp" android:orientation="vertical" android:background="@drawable/bg_card">
+                <TextView android:id="@+id/completedCount" style="@style/Text.Workorder.Title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" />
+                <TextView style="@style/Text.Workorder.Caption" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/completed" />
+            </LinearLayout>
+        </LinearLayout>
+        <TextView android:id="@+id/statisticsNote" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" />
+        <LinearLayout android:id="@+id/categorySection" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:padding="20dp" android:orientation="vertical" android:background="@drawable/bg_card" android:visibility="gone">
+            <TextView style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/category" />
+            <TextView android:id="@+id/categoryStats" style="@style/Text.Workorder.Body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:lineSpacingExtra="12dp" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:id="@+id/recentLabel" style="@style/Text.Workorder.Section" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/viewAll" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/view_all" />
+        </LinearLayout>
+        <TextView android:id="@+id/message" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:accessibilityLiveRegion="polite" />
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/recentList" android:layout_width="match_parent" android:layout_height="wrap_content" android:nestedScrollingEnabled="false" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/refresh" style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/refresh" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

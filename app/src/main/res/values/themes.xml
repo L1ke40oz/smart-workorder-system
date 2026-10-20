@@ -1,0 +1,36 @@
+<resources>
+    <style name="Base.Theme.Smartworkordersystem" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item><item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/primary</item><item name="colorSurface">@color/surface</item>
+        <item name="colorSecondaryContainer">@color/mint</item><item name="colorOnSecondaryContainer">@color/primary</item>
+        <item name="colorOnSurface">@color/ink</item><item name="colorOnSurfaceVariant">@color/muted</item>
+        <item name="android:colorBackground">@color/canvas</item><item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item><item name="android:statusBarColor">@color/canvas</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="materialButtonStyle">@style/Widget.Workorder.Button</item>
+        <item name="textInputStyle">@style/Widget.Workorder.Input</item>
+    </style>
+    <style name="Theme.Smartworkordersystem" parent="Base.Theme.Smartworkordersystem" />
+    <style name="Widget.Workorder.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">14dp</item><item name="android:textSize">15sp</item>
+        <item name="android:minHeight">54dp</item><item name="android:insetTop">0dp</item><item name="android:insetBottom">0dp</item>
+    </style>
+    <style name="Widget.Workorder.Input" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item><item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item><item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxBackgroundColor">@color/surface</item>
+    </style>
+    <style name="Text.Workorder.Title" parent="">
+        <item name="android:textColor">@color/ink</item><item name="android:textSize">28sp</item><item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="Text.Workorder.Section" parent="">
+        <item name="android:textColor">@color/ink</item><item name="android:textSize">18sp</item><item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="Text.Workorder.Body" parent="">
+        <item name="android:textColor">@color/ink</item><item name="android:textSize">15sp</item><item name="android:lineSpacingExtra">5dp</item>
+    </style>
+    <style name="Text.Workorder.Caption" parent="">
+        <item name="android:textColor">@color/muted</item><item name="android:textSize">13sp</item><item name="android:lineSpacingExtra">4dp</item>
+    </style>
+</resources>

@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: smart-workorder
+  profiles:
+    default: dev
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+app:
+  security:
+    secret: ${JWT_SECRET:}
+  bootstrap:
+    admin-username: ${ADMIN_USERNAME:admin}
+    admin-password: ${ADMIN_PASSWORD:}
+  ai:
+    gemini-base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
+    gemini-model: ${GEMINI_MODEL:}
+    gemini-key: ${GEMINI_API_KEY:}
+    embedding-base-url: ${EMBEDDING_BASE_URL:https://api.siliconflow.cn/v1}
+    embedding-model: ${EMBEDDING_MODEL:BAAI/bge-m3}
+    embedding-key: ${SILICONFLOW_API_KEY:}
+    embedding-dimensions: ${EMBEDDING_DIMENSIONS:1024}
+  rag:
+    index-directory: ${RAG_INDEX_DIRECTORY:./data/vectors}
+    auto-sync-enabled: ${RAG_AUTO_SYNC_ENABLED:true}
+    minimum-similarity: ${RAG_MINIMUM_SIMILARITY:0.35}

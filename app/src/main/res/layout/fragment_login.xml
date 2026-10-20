@@ -1,0 +1,24 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/brand_eyebrow" android:textColor="@color/primary" android:textSize="14sp" android:letterSpacing="0.1" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="28dp" android:padding="26dp" android:orientation="vertical" android:background="@drawable/bg_hero">
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_tickets" app:tint="@color/white" android:importantForAccessibility="no" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="28dp" android:text="@string/login_title" android:textSize="29sp" android:textColor="@color/white" android:fontFamily="sans-serif-medium" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/login_subtitle" android:textSize="14sp" android:textColor="#D7E5D9" android:lineSpacingExtra="5dp" />
+        </LinearLayout>
+        <TextView android:id="@+id/formTitle" style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="32dp" android:text="@string/login" />
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:hint="@string/username">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/username" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textVisiblePassword" android:singleLine="true" android:maxLength="32" android:autofillHints="username" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout android:id="@+id/displayNameLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:hint="@string/display_name" android:visibility="gone">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/displayName" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPersonName" android:singleLine="true" android:maxLength="40" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:hint="@string/password" app:endIconMode="password_toggle">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/password" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPassword" android:singleLine="true" android:maxLength="64" android:autofillHints="password" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <TextView android:id="@+id/error" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textColor="@color/danger" android:textSize="13sp" android:accessibilityLiveRegion="polite" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/submit" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="12dp" android:text="@string/login" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/toggleMode" style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/register" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/serverSettings" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:text="@string/server_settings" android:textColor="@color/muted" />
+    </LinearLayout>
+</ScrollView>

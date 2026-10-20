@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">知序工单</string><string name="brand_eyebrow">知序 · 服务工作台</string>
+    <string name="login_title">让问题，有序解决。</string><string name="login_subtitle">记录每一次报修，跟进每一步处理。</string>
+    <string name="login">登录</string><string name="register">注册账号</string>
+    <string name="username">账号</string><string name="password">密码</string><string name="display_name">你的称呼</string>
+    <string name="home">工作台</string><string name="tickets">工单</string><string name="profile">我的</string>
+    <string name="create_ticket">新建工单</string><string name="view_all">查看全部</string><string name="refresh">刷新</string>
+    <string name="pending">待处理</string><string name="processing">处理中</string><string name="completed">已完成</string><string name="all">全部</string>
+    <string name="search_hint">搜索摘要或工单编号</string><string name="search">查询</string>
+    <string name="next_page">下一页</string><string name="previous_page">上一页</string>
+    <string name="description">发生了什么问题？</string><string name="description_hint">例如：办公室三楼的打印机一直卡纸，打印时伴随异响，已经无法使用。</string>
+    <string name="describe_subtitle">尽量写清设备、地点和影响，方便准确处理。</string>
+    <string name="analyze">智能整理</string><string name="manual_entry">填写工单信息</string>
+    <string name="summary">问题摘要</string><string name="category">工单类别</string><string name="priority">紧急程度</string>
+    <string name="device">设备名称（选填）</string><string name="location">故障地点（选填）</string><string name="tags">标签（选填，用逗号分隔）</string>
+    <string name="confirm_submit">确认并提交</string><string name="confirm_title">确认工单信息</string>
+    <string name="original">原始描述</string><string name="resolution">处理结果</string><string name="resolution_hint">记录实际排查过程、采取的措施与验证结果。</string>
+    <string name="accept">接单并开始处理</string><string name="complete">提交结果并完成</string>
+    <string name="logout">退出登录</string><string name="retry">重试</string><string name="back">返回</string><string name="cancel">取消</string><string name="ok">确定</string>
+    <string name="server_settings">连接设置</string>
+    <string name="use_manual">改为手动填写</string>
+    <string name="knowledge_reference">历史案例与处理参考</string>
+    <string name="knowledge_explanation">建议仅供排查参考，实际处理结果请自行填写。匹配度表示文本相似程度。</string>
+    <string name="find_similar">检索相似案例</string><string name="sync_knowledge">同步已完成工单</string><string name="open_case">查看原工单</string>
+</resources>
