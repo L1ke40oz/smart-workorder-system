@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 public class AiController {
     private final AnalysisService analysis;
     private final CurrentUser current;
-    private final GeminiClient gemini;
+    private final LlmClient llm;
     private final RagService rag;
-    public AiController(AnalysisService analysis,CurrentUser current,GeminiClient gemini,RagService rag) {
-        this.analysis=analysis;this.current=current;this.gemini=gemini;this.rag=rag;
+    public AiController(AnalysisService analysis,CurrentUser current,LlmClient llm,RagService rag) {
+        this.analysis=analysis;this.current=current;this.llm=llm;this.rag=rag;
     }
     @GetMapping("/capabilities") public Map<String,Boolean> capabilities(@AuthenticationPrincipal Jwt jwt) {
-        current.require(jwt);return Map.of("analysis",gemini.configured(),"rag",rag.configured());
+        current.require(jwt);return Map.of("analysis",llm.configured(),"rag",rag.configured());
     }
     @PostMapping("/analyses")
     public AnalysisService.View analyze(@AuthenticationPrincipal Jwt jwt,@Valid @RequestBody AnalysisService.Input input) {

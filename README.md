@@ -15,7 +15,7 @@ Android 课程项目，依据 SPEC v1.1 独立开发。Android 使用 Java / XML
 
 ## 当前实现范围
 
-已实现注册登录、两个角色首页、文字工单、确认提交、列表搜索与筛选、详情、接单、完成、处理结果查询、基础统计；还包括 Gemini 分析预览、硅基流动 embedding、历史工单 Lucene 向量检索和处理参考建议。
+已实现注册登录、两个角色首页、文字工单、确认提交、列表搜索与筛选、详情、接单、完成、处理结果查询、基础统计；还包括 OpenAI 兼容 LLM 分析预览、硅基流动 embedding、历史工单 Lucene 向量检索和处理参考建议。
 
 基础业务经过 MySQL 和 Android 模拟器验收。智能模块的 HTTP 请求、解析、检索与业务逻辑通过本地供应商测试接口验证；真实模型名、密钥及网络联通尚待配置。语音、图片和云部署属于后续工作。
 
@@ -93,7 +93,24 @@ mvn package
 
 ## 智能服务配置
 
-推荐使用本地配置文件：在项目根目录将 `backend/.env.example` 复制为 `backend/.env`，填写 `GEMINI_API_KEY`、`GEMINI_MODEL`，需要 RAG 时再填写 `SILICONFLOW_API_KEY`。模型名使用你的账号实际支持结构化输出的 Gemini 模型。保留 `SPRING_PROFILES_ACTIVE=dev` 即继续使用本地 H2，不需要配置 MySQL。
+推荐使用本地配置文件：首次在项目根目录将 `backend/.env.example` 复制为 `backend/.env`，填写 `LLM_BASE_URL`、`LLM_API_KEY`、`LLM_MODEL`，需要 RAG 时再填写 `SILICONFLOW_API_KEY`。模型名使用服务商实际提供的模型 ID，可包含厂商前缀、斜杠或冒号。保留 `SPRING_PROFILES_ACTIVE=dev` 即继续使用本地 H2，不需要配置 MySQL。
+
+```dotenv
+LLM_BASE_URL=https://你的中转站域名/v1
+LLM_API_KEY=填写该服务商提供的密钥
+LLM_MODEL=填写该服务商提供的模型ID
+LLM_RESPONSE_FORMAT=json_object
+```
+
+`LLM_BASE_URL` 包含服务商要求的版本路径，后端在其后添加 `/chat/completions`；也支持填写完整的 Chat Completions 地址（不会重复追加）。必须是 OpenAI 兼容的 Chat Completions 服务，不能直接填写 Gemini 原生 generateContent、Responses 或其他协议的地址。更换服务商时需配套修改地址、密钥和模型名。
+
+| LLM_RESPONSE_FORMAT | 使用场景 |
+| --- | --- |
+| json_object | 默认，发送 JSON 对象输出约束；后端继续校验字段类型、枚举与长度 |
+| json_schema | 服务商支持严格结构化输出时使用，发送标准 JSON Schema |
+| text | 服务商不支持 response_format 时使用，不发送该参数；通过提示词要求 JSON，后端仍严格校验，可去除包裹整个 JSON 的单个代码块 |
+
+不会在参数不支持时自动重复请求，以免重复消耗额度。若服务商拒绝输出格式参数，可按其文档切换为 `text`；模型仍需能返回符合字段要求的 JSON。
 
 ```powershell
 # 仅首次创建；如果已经有 .env，直接编辑它，不要覆盖。
@@ -107,15 +124,19 @@ Copy-Item backend/.env.example backend/.env
 也可以在启动后端的同一终端设置环境变量，再于 `backend` 目录启动：
 
 ```powershell
-$env:GEMINI_API_KEY = '<你的Gemini密钥>'
-$env:GEMINI_MODEL = '<账号中可用、支持结构化输出的Gemini模型名>'
+$env:LLM_BASE_URL = 'https://你的中转站域名/v1'
+$env:LLM_API_KEY = '<服务商密钥>'
+$env:LLM_MODEL = '<服务商提供的模型ID>'
+$env:LLM_RESPONSE_FORMAT = 'json_object'
 $env:SILICONFLOW_API_KEY = '<你的硅基流动密钥>'
 $env:EMBEDDING_MODEL = 'BAAI/bge-m3'
 mvn spring-boot:run
 ```
 
-Gemini 使用原生 REST 协议，默认地址 `https://generativelanguage.googleapis.com/v1beta`；如使用兼容服务，必须保持该协议与路径约定。embedding 默认地址 `https://api.siliconflow.cn/v1`。密钥仅由后端持有，不填入 Android。
+LLM 使用 `Authorization: Bearer`、`messages`、`model` 的 OpenAI 兼容 Chat Completions 请求，默认基础地址为 `https://api.openai.com/v1`，模型名与密钥不预设；可更换为提供该协议的服务商或中转站。embedding 已使用兼容 `/embeddings` 协议，默认地址仍为 `https://api.siliconflow.cn/v1`，模型为 `BAAI/bge-m3`。密钥仅由后端持有，不填入 Android。
+
+从旧版更新时，`GEMINI_*` 不再生效，改填新的 `LLM_*`。现有本地配置会保留，不自动将旧密钥发送给新地址。新智能工单来源标记为 LLM，历史 GEMINI 标记继续正常展示，无需删除数据库。
 
 未配置智能服务时，App 提供明确的手动填写流程，不返回伪造模型结果。历史工单完成后异步进入知识索引；已有历史记录可由管理员在详情页请求同步。默认索引目录为 `backend/data/vectors/`，不要让多个后端进程同时写入同一目录。
 
-完整环境项见 `backend/.env.example`。只有项目启动脚本会读取 `.env`；直接执行 `mvn spring-boot:run` 时仍需自行在终端设置环境变量。首次真实联调建议先验证 Gemini 的工单回填，再验证 embedding 和历史案例检索。
+完整环境项见 `backend/.env.example`。只有项目启动脚本会读取 `.env`；直接执行 `mvn spring-boot:run` 时仍需自行在终端设置环境变量。首次真实联调建议先验证 LLM 的工单回填，再验证 embedding 和历史案例检索。协议参考 [官方 Chat Completions 接口](https://developers.openai.com/api/reference/resources/chat) 与 [结构化输出说明](https://developers.openai.com/api/docs/guides/structured-outputs)，第三方服务的实际支持范围仍需用其文档和账号联调确认。

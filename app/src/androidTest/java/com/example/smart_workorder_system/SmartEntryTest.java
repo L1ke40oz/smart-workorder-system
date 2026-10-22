@@ -18,7 +18,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static org.hamcrest.Matchers.containsString;
 
-/** Run only against an isolated backend configured with the documented local Gemini fixture. */
+/** Run only against an isolated backend configured with the documented local OpenAI-compatible fixture. */
 @RunWith(AndroidJUnit4.class)
 public class SmartEntryTest {
     @Test public void smartPreviewFillsFieldsAndAllowsCorrectionsBeforeCreating() {

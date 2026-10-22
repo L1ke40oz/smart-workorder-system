@@ -17,7 +17,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:flows;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
-        "app.bootstrap.admin-password=TestAdmin123!"})
+        "app.bootstrap.admin-password=TestAdmin123!","app.ai.llm-key=","app.ai.llm-model=",
+        "app.ai.embedding-key=","app.rag.auto-sync-enabled=false"})
 @AutoConfigureMockMvc
 class WorkorderFlowTest {
     @Autowired MockMvc mvc;

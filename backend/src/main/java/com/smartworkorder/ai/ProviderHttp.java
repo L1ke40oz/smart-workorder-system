@@ -21,6 +21,9 @@ public class ProviderHttp {
             headers.forEach(builder::header);
             HttpResponse<String> response=client.send(builder.build(),HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
             if(response.statusCode()==429) throw new ApiException(503,"智能服务繁忙，请稍后重试");
+            if(response.statusCode()==401 || response.statusCode()==403) throw new ApiException(502,"智能服务鉴权失败，请检查 API 密钥和模型访问权限");
+            if(response.statusCode()==404) throw new ApiException(502,"智能接口或模型不存在，请检查服务地址和模型名");
+            if(response.statusCode()==400 || response.statusCode()==422) throw new ApiException(502,"智能服务不接受当前参数，请检查模型及输出格式配置");
             if(response.statusCode()<200 || response.statusCode()>=300) throw new ApiException(502,"智能服务调用失败，请稍后重试或联系管理员");
             if(response.body().length()>1_000_000) throw new ApiException(502,"智能服务响应过大");
             return json.readTree(response.body());

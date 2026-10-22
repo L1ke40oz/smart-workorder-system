@@ -44,7 +44,7 @@
 
 通过智能分析创建时必须同时携带返回的 `analysisId` 和对应的完整 `originalDescription`。该 ID 绑定当前用户和原始描述，30 分钟内有效，仅允许创建一张正式工单。客户端可核对和修正结构化字段；修改原文后需重新分析，也可切换到手动填写。`analysisSource` 由后端决定，不能由客户端伪造。
 
-手动创建不要求独立原文，缺省 / null / 全空白原文持久化为 null；若旧客户端仍提交非空原文，按输入原样保留。Android 手动模式不发送智能输入框内的草稿及 analysisId，来源为 MANUAL；智能模式来源为 GEMINI。手动详情隐藏空的原始描述区域，不拼接或伪造原文。
+手动创建不要求独立原文，缺省 / null / 全空白原文持久化为 null；若旧客户端仍提交非空原文，按输入原样保留。Android 手动模式不发送智能输入框内的草稿及 analysisId，来源为 MANUAL；新智能工单来源为 LLM。历史 GEMINI 来源保留，仍按智能工单展示并兼容同内容重试。手动详情隐藏空的原始描述区域，不拼接或伪造原文。
 
 | 字段 | 约束 |
 | --- | --- |
@@ -79,7 +79,7 @@
 | 方法 | 路径 | 作用 / 权限 |
 | --- | --- | --- |
 | GET | `/capabilities` | 返回 analysis、rag 配置可用标识，不返回密钥；标识为 true 不等于外部网络或账号已验证 |
-| POST | `/analyses` | 普通用户提交 originalDescription，后端调用 Gemini 并暂存分析结果 |
+| POST | `/analyses` | 普通用户提交 originalDescription，后端调用 OpenAI 兼容 LLM 并暂存分析结果 |
 | GET | `/tickets/{id}/suggestions` | 管理员检索历史已完成案例并获取处理参考 |
 | POST | `/knowledge/sync` | 管理员请求异步同步历史工单，202 返回安排信息 |
 
@@ -88,11 +88,19 @@
 RAG 响应包含：
 
 - `matches`：相关已完成工单，包含 ticketId、number、summary、resolution、similarity。
-- `suggestion`：Gemini 生成的参考文本，可以为空。
+- `suggestion`：LLM 生成的参考文本，可以为空。
 - `suggestionError`：无匹配或建议未成功生成时的说明。
 - `referenceNumbers`：建议引用的实际工单编号，仅允许来自本次检索结果。
 
 similarity 使用余弦相似度，不是故障诊断正确率。仅返回高于配置阈值的 Top-3 案例，并排除当前工单；无案例时不调用模型编造建议。建议生成失败时仍返回已经检索到的案例，知识服务不改变工单状态。
+
+## 后端到模型服务的协议
+
+Android 到业务后端的接口保持原有契约，不直接持有服务商密钥。工单整理和 RAG 建议统一调用 `LLM_BASE_URL` 对应的 OpenAI 兼容 Chat Completions 接口：Bearer 鉴权，body 含 model、system / user messages 与 stream=false；读取 choices[0].message.content，仅接受 finish_reason=stop 的完整结果，拒绝 refusal 与工具调用结果。配置基础地址时自动追加 `/chat/completions`，配置完整端点时直接使用。
+
+`LLM_RESPONSE_FORMAT` 支持 json_object（默认）、json_schema（严格标准 Schema）、text（不发送 response_format）。三种模式均要求单个 JSON 对象并执行后端字段校验；不接受多段 JSON、尾随文字或截断结果。text 模式仅允许去掉完整包裹 JSON 的单个代码块，不从任意解释文字中猜测提取内容。不自动切换模式或重试，以免额外消耗服务额度。
+
+Schema 使用小写类型、允许 null 的联合类型、全部键 required 与 additionalProperties=false；服务商是否支持具体输出模式需按其文档选择。模型 ID 原样放入 body，可含斜杠、冒号；不拼到 URL 中。旧 GEMINI_* 配置不再读取。Embedding 已采用兼容 `/embeddings` 请求，维持独立的模型、地址和硅基流动密钥配置。
 
 ## 错误状态
 
@@ -103,7 +111,7 @@ similarity 使用余弦相似度，不是故障诊断正确率。仅返回高于
 | 403 | 角色不符或不是接单管理员 |
 | 404 | 工单 / 分析结果不存在或对当前用户不可见 |
 | 409 | 状态冲突、重复账号、分析过期 / 已使用、幂等内容冲突 |
-| 502 | 智能服务响应错误、无效模型结构或异常向量 |
+| 502 | 智能服务响应错误、鉴权 / 地址 / 参数配置错误、无效模型结构或异常向量 |
 | 503 | 智能服务未配置、限流或知识索引不可用 |
 | 504 | 智能服务超时 |
 

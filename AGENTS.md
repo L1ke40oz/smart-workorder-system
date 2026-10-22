@@ -3,7 +3,7 @@
 - 本项目需求以用户指定的 SPEC v1.1 为准，实施记录见 `docs/`。先阅读现有开发记录，避免把已实现功能当作待做事项。
 - Android 业务必须使用 Java、XML Layout、MVVM、ViewModel、LiveData、Retrofit、RecyclerView，最低 API 24。Gradle 可以使用 Kotlin DSL；不得改为 Kotlin 业务代码或 Compose。
 - 后端在 `backend/`，使用 Java 17 / Spring Boot / JPA；支持 MySQL 与本地 H2 开发模式。用户计划后续部署到自有 VPS。
-- 用户指定 Gemini 和硅基流动 BAAI embedding。模型名与密钥通过后端环境配置，不写入客户端、源码或开发记录。
+- 用户最初指定 Gemini，后于 2026-10-22 明确统一使用 OpenAI 兼容 Chat Completions 协议，可通过中转站选择模型；embedding 继续使用硅基流动 BAAI 的兼容 embeddings 接口。模型名与密钥通过后端环境配置，不写入客户端、源码或开发记录。
 - 第一版只有 USER 和 ADMIN，管理员同时负责工程处理；不扩展额外角色、邮件、聊天或复杂审批。
 - UI 使用简洁中文排版、常规功能图标和状态颜色，不使用 emoji 装饰。临时产品名为“知序工单”，可按用户反馈调整。
 - 每轮修改结束前更新 `docs/开发记录.md`，写明操作、完成功能、验证结果和剩余事项；架构、接口或流程变化同步更新对应文档，供项目报告使用。

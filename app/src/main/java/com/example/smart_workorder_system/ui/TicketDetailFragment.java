@@ -64,7 +64,7 @@ public class TicketDetailFragment extends BaseFragment {
                     +"\n标签    "+(t.tags==null || t.tags.isEmpty() ? "未提供" : android.text.TextUtils.join("、",t.tags))
                     +"\n影响范围    "+Ui.orDash(t.impactScope)+"\n故障开始时间    "+Ui.orDash(t.faultStartedAt)
                     +"\n错误提示    "+Ui.orDash(t.errorMessage)+"\n已尝试操作    "+Ui.orDash(t.attemptedActions)
-                    +"\n信息来源    "+("GEMINI".equals(t.analysisSource) ? "智能整理后确认" : "手动填写"));
+                    +"\n信息来源    "+("LLM".equals(t.analysisSource) || "GEMINI".equals(t.analysisSource) ? "智能整理后确认" : "手动填写"));
             b.resolution.setText(t.resolution==null ? "尚未填写处理结果，请耐心等待。" : t.resolution);
             Models.User actor=vm.user.getValue();
             boolean canComplete=actor!=null && actor.isAdmin() && "PROCESSING".equals(t.status) && t.assignedTo!=null && t.assignedTo==actor.id;

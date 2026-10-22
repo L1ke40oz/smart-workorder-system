@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** Real HTTP serialization + H2 transactions + real Lucene index, using local provider fixtures. */
 @SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:intelligence;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
-        "app.bootstrap.admin-password=TestAdmin123!","app.ai.gemini-model=test-gemini","app.ai.gemini-key=fixture-gemini-key",
+        "app.bootstrap.admin-password=TestAdmin123!","app.ai.llm-model=vendor/test-model:free","app.ai.llm-key=fixture-llm-key","app.ai.llm-response-format=json_object",
         "app.ai.embedding-key=fixture-embedding-key","app.ai.embedding-dimensions=3","app.rag.auto-sync-enabled=false"})
 @AutoConfigureMockMvc
 class IntelligenceFlowTest {
@@ -36,9 +36,10 @@ class IntelligenceFlowTest {
     @Autowired ObjectMapper json;
     @Autowired TicketService tickets;
     @Autowired KnowledgeIndexer indexer;
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
     @DynamicPropertySource static void configuration(DynamicPropertyRegistry registry) {
         String base="http://127.0.0.1:"+SERVER.getAddress().getPort();
-        registry.add("app.ai.gemini-base-url",() -> base+"/v1beta");registry.add("app.ai.embedding-base-url",() -> base+"/v1");
+        registry.add("app.ai.llm-base-url",() -> base+"/v1");registry.add("app.ai.embedding-base-url",() -> base+"/v1");
         registry.add("app.rag.index-directory",() -> {
             try { return Files.createTempDirectory("workorder-vector-test-").toString(); }catch(Exception e) { throw new IllegalStateException(e); }
         });
@@ -59,8 +60,11 @@ class IntelligenceFlowTest {
         draft.remove("originalDescription");call(post("/api/tickets"),user,draft,409);
         draft.put("originalDescription",original+"内容已变化");call(post("/api/tickets"),user,draft,409);draft.put("originalDescription",original);
         JsonNode created=call(post("/api/tickets"),user,draft,201);long historical=created.path("id").asLong();
-        assertThat(created.path("analysisSource").asText()).isEqualTo("GEMINI");
+        assertThat(created.path("analysisSource").asText()).isEqualTo("LLM");
         assertThat(call(post("/api/tickets"),user,draft,201).path("id").asLong()).isEqualTo(historical);
+        // Legacy records keep their original source and remain idempotent after the transport change.
+        jdbc.update("UPDATE tickets SET analysis_source='GEMINI' WHERE id=?",historical);
+        assertThat(call(post("/api/tickets"),user,draft,201).path("analysisSource").asText()).isEqualTo("GEMINI");
         draft.put("clientRequestId",UUID.randomUUID().toString());call(post("/api/tickets"),user,draft,409);
         int before=MODEL_CALLS.get();
         JsonNode empty=call(get("/api/tickets/"+historical+"/suggestions"),admin,null,200);
@@ -69,12 +73,18 @@ class IntelligenceFlowTest {
         call(post("/api/tickets/"+historical+"/complete"),admin,Map.of("resolution","清洁进纸通道，更换搓纸轮后恢复正常。"),200);
         indexer.index(tickets.completedCase(historical));indexer.index(tickets.completedCase(historical));
         draft.remove("analysisId");draft.put("clientRequestId",UUID.randomUUID().toString());draft.put("summary","新打印机卡纸故障");
+        draft.remove("originalDescription");
         long target=call(post("/api/tickets"),user,draft,201).path("id").asLong();
         JsonNode advice=call(get("/api/tickets/"+target+"/suggestions"),admin,null,200);
         assertThat(advice.path("matches").size()).isEqualTo(1);
         assertThat(advice.path("matches").get(0).path("ticketId").asLong()).isEqualTo(historical);
         assertThat(advice.path("suggestion").asText()).contains("进纸通道");
         assertThat(advice.path("referenceNumbers").get(0).asText()).isEqualTo(created.path("number").asText());
+        for(String mode : List.of("BAD_REFERENCE","ADVICE_TYPE")) {
+            MODE.set(mode);JsonNode rejected=call(get("/api/tickets/"+target+"/suggestions"),admin,null,200);
+            assertThat(rejected.path("matches").size()).isEqualTo(1);
+            assertThat(rejected.path("suggestion").isNull()).isTrue();assertThat(rejected.path("suggestionError").asText()).isNotBlank();
+        }
         call(get("/api/tickets/"+target+"/suggestions"),user,null,403);call(post("/api/knowledge/sync"),other,null,403);
         MODE.set("PROVIDER_ERROR");JsonNode partial=call(get("/api/tickets/"+target+"/suggestions"),admin,null,200);
         assertThat(partial.path("matches").size()).isEqualTo(1);assertThat(partial.path("suggestion").isNull()).isTrue();
@@ -84,7 +94,7 @@ class IntelligenceFlowTest {
     }
     @Test void malformedOrIllegalModelResultsNeverCreateTickets() throws Exception {
         String user=register();
-        for(String mode : List.of("BAD_JSON","BAD_CATEGORY","BAD_TYPE","INCOMPLETE")) {
+        for(String mode : List.of("BAD_JSON","BAD_CATEGORY","BAD_TYPE","INCOMPLETE","REFUSAL","TRAILING_JSON","EXTRA_FIELD")) {
             MODE.set(mode);call(post("/api/analyses"),user,Map.of("originalDescription","打印机卡纸"),502);
         }
         MODE.set("RATE_LIMIT");call(post("/api/analyses"),user,Map.of("originalDescription","打印机卡纸"),503);
@@ -143,27 +153,36 @@ class IntelligenceFlowTest {
                     response=Map.of("data",List.of(Map.of("index",0,"embedding",vector)));
                 } else {
                     MODEL_CALLS.incrementAndGet();
-                    if(!"fixture-gemini-key".equals(exchange.getRequestHeaders().getFirst("x-goog-api-key"))) code=401;
+                    if(!"Bearer fixture-llm-key".equals(exchange.getRequestHeaders().getFirst("Authorization"))) code=401;
+                    if(!"/v1/chat/completions".equals(exchange.getRequestURI().getPath())
+                            || !"vendor/test-model:free".equals(body.path("model").asText())
+                            || !"system".equals(body.path("messages").path(0).path("role").asText())
+                            || !"user".equals(body.path("messages").path(1).path("role").asText())
+                            || !"json_object".equals(body.path("response_format").path("type").asText())
+                            || !body.path("stream").isBoolean() || body.path("stream").asBoolean()) code=400;
                     if(mode.equals("RATE_LIMIT")) code=429;if(mode.equals("PROVIDER_ERROR")) code=500;
                     String text;
-                    if(body.path("generationConfig").path("responseSchema").path("properties").has("referenceNumbers")) {
-                        JsonNode context=JSON.readTree(body.path("contents").get(0).path("parts").get(0).path("text").asText());
-                        text=JSON.writeValueAsString(Map.of("suggestion","参考历史案例，先断电检查进纸通道，再验证连续打印。",
-                                "referenceNumbers",List.of(context.path("cases").get(0).path("number").asText())));
+                    if(body.path("messages").path(0).path("content").asText().contains("\"referenceNumbers\"")) {
+                        JsonNode context=JSON.readTree(body.path("messages").path(1).path("content").asText());
+                        text=JSON.writeValueAsString(Map.of("suggestion",mode.equals("ADVICE_TYPE") ? 42 : "参考历史案例，先断电检查进纸通道，再验证连续打印。",
+                                "referenceNumbers",List.of(mode.equals("BAD_REFERENCE") ? "INVENTED" : context.path("cases").get(0).path("number").asText())));
                     } else {
                         ObjectNode result=JSON.createObjectNode();result.put("category",mode.equals("BAD_CATEGORY") ? "自创分类" : "设备故障");
                         result.put("deviceName","打印机");result.putNull("location");result.put("priority","较急");result.putArray("tags").add("卡纸");
                         result.put("summary","打印机卡纸并伴随异响");if(mode.equals("BAD_TYPE")) result.put("summary",42);
-                        String original=body.path("contents").get(0).path("parts").get(0).path("text").asText();
+                        String original=body.path("messages").path(1).path("content").asText();
                         for(String field : List.of("impactScope","faultStartedAt","errorMessage","attemptedActions")) result.putNull(field);
                         if(original.contains("今天上午")) {
                             result.put("impactScope","办公室 5 人");result.put("faultStartedAt","今天上午");
                             result.put("errorMessage","E03");result.put("attemptedActions","重启后仍卡纸");
                         }
+                        if(mode.equals("EXTRA_FIELD")) result.put("unexpected","extra");
                         text=mode.equals("BAD_JSON") ? "not-json" : result.toString();
+                        if(mode.equals("TRAILING_JSON")) text+=" {}";
                     }
-                    response=Map.of("candidates",List.of(Map.of("finishReason",mode.equals("INCOMPLETE") ? "MAX_TOKENS" : "STOP",
-                            "content",Map.of("parts",List.of(Map.of("text",text))))));
+                    Map<String,Object> message=new HashMap<>();message.put("role","assistant");message.put("content",text);
+                    if(mode.equals("REFUSAL")) message.put("refusal","fixture refusal");
+                    response=Map.of("choices",List.of(Map.of("index",0,"finish_reason",mode.equals("INCOMPLETE") ? "length" : "stop","message",message)));
                 }
                 byte[] bytes=JSON.writeValueAsBytes(response);exchange.getResponseHeaders().set("Content-Type","application/json");
                 exchange.sendResponseHeaders(code,bytes.length);exchange.getResponseBody().write(bytes);exchange.close();

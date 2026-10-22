@@ -23,9 +23,10 @@ app:
     admin-username: ${ADMIN_USERNAME:admin}
     admin-password: ${ADMIN_PASSWORD:}
   ai:
-    gemini-base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
-    gemini-model: ${GEMINI_MODEL:}
-    gemini-key: ${GEMINI_API_KEY:}
+    llm-base-url: ${LLM_BASE_URL:https://api.openai.com/v1}
+    llm-model: ${LLM_MODEL:}
+    llm-key: ${LLM_API_KEY:}
+    llm-response-format: ${LLM_RESPONSE_FORMAT:json_object}
     embedding-base-url: ${EMBEDDING_BASE_URL:https://api.siliconflow.cn/v1}
     embedding-model: ${EMBEDDING_MODEL:BAAI/bge-m3}
     embedding-key: ${SILICONFLOW_API_KEY:}

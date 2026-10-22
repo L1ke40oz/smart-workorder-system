@@ -38,12 +38,14 @@ public class TicketService {
         users.lockById(actor.getId()).orElseThrow(() -> new ApiException(401, "账号不存在"));
         Ticket existing = tickets.findByOwnerIdAndRequestKey(actor.getId(), input.clientRequestId().toString()).orElse(null);
         if (existing != null) {
+            boolean sourceMatches=input.analysisId()==null ? "MANUAL".equals(existing.analysisSource)
+                    : Set.of("LLM","GEMINI").contains(existing.analysisSource);
             if (!Objects.equals(existing.originalDescription,original(input.originalDescription())) || !existing.summary.equals(input.summary().trim())
                     || !existing.category.equals(input.category()) || !existing.priority.equals(input.priority())
                     || !Objects.equals(existing.deviceName,clean(input.deviceName())) || !Objects.equals(existing.location,clean(input.location()))
                     || !Objects.equals(existing.impactScope,clean(input.impactScope())) || !Objects.equals(existing.faultStartedAt,clean(input.faultStartedAt()))
                     || !Objects.equals(existing.errorMessage,clean(input.errorMessage())) || !Objects.equals(existing.attemptedActions,clean(input.attemptedActions()))
-                    || !existing.analysisSource.equals(input.analysisId()==null ? "MANUAL" : "GEMINI")
+                    || !sourceMatches
                     || !existing.tagsJson.equals(write(input.tags()))) {
                 throw new ApiException(409, "本次提交标识已使用，请重新新建工单");
             }
@@ -59,7 +61,7 @@ public class TicketService {
         t.location = clean(input.location()); t.tagsJson = write(input.tags());
         t.impactScope=clean(input.impactScope());t.faultStartedAt=clean(input.faultStartedAt());
         t.errorMessage=clean(input.errorMessage());t.attemptedActions=clean(input.attemptedActions());
-        t.analysisSource = input.analysisId()==null ? "MANUAL" : "GEMINI"; t.status = "PENDING";
+        t.analysisSource = input.analysisId()==null ? "MANUAL" : "LLM"; t.status = "PENDING";
         t.createdAt = Instant.now(); t.updatedAt = t.createdAt;
         tickets.save(t);analysis.markUsed(input.analysisId(),actor,t.id);return view(t);
     }
