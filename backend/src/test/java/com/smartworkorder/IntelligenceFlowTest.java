@@ -56,6 +56,7 @@ class IntelligenceFlowTest {
         ObjectNode draft=(ObjectNode)preview.path("result").deepCopy();draft.put("originalDescription",original);
         draft.put("clientRequestId",UUID.randomUUID().toString());draft.put("analysisId",preview.path("analysisId").asText());
         call(post("/api/tickets"),other,draft,404);
+        draft.remove("originalDescription");call(post("/api/tickets"),user,draft,409);
         draft.put("originalDescription",original+"内容已变化");call(post("/api/tickets"),user,draft,409);draft.put("originalDescription",original);
         JsonNode created=call(post("/api/tickets"),user,draft,201);long historical=created.path("id").asLong();
         assertThat(created.path("analysisSource").asText()).isEqualTo("GEMINI");
@@ -99,6 +100,27 @@ class IntelligenceFlowTest {
         MODE.set("NORMAL");JsonNode unmatched=call(get("/api/tickets/"+id+"/suggestions"),admin,null,200);
         assertThat(unmatched.path("matches").size()).isZero();
     }
+    @Test void analysisExtractsContextAndUserCanCorrectItBeforeConfirmation() throws Exception {
+        String user=register();String original="今天上午办公室 5 人打印时提示 E03，重启后仍卡纸。";
+        JsonNode preview=call(post("/api/analyses"),user,Map.of("originalDescription",original),200);
+        JsonNode result=preview.path("result");
+        assertThat(result.path("impactScope").asText()).isEqualTo("办公室 5 人");
+        assertThat(result.path("faultStartedAt").asText()).isEqualTo("今天上午");
+        assertThat(result.path("errorMessage").asText()).isEqualTo("E03");
+        assertThat(result.path("attemptedActions").asText()).isEqualTo("重启后仍卡纸");
+        assertThat(call(get("/api/tickets"),user,null,200).path("total").asLong()).isZero();
+        ObjectNode draft=(ObjectNode)result.deepCopy();draft.put("originalDescription",original);
+        draft.put("analysisId",preview.path("analysisId").asText());draft.put("clientRequestId",UUID.randomUUID().toString());
+        draft.put("impactScope","办公室 6 人（核对后修正）");
+        JsonNode created=call(post("/api/tickets"),user,draft,201);
+        assertThat(created.path("impactScope").asText()).contains("6 人");
+        assertThat(created.path("originalDescription").asText()).isEqualTo(original);
+        JsonNode sparse=call(post("/api/analyses"),user,Map.of("originalDescription","打印机卡纸"),200);
+        for(String field : List.of("impactScope","faultStartedAt","errorMessage","attemptedActions")) {
+            assertThat(sparse.path("result").path(field).isNull()).isTrue();
+        }
+    }
+
     private String register() throws Exception {
         return call(post("/api/auth/register"),null,Map.of("username","ai_"+UUID.randomUUID().toString().replace("-","").substring(0,16),
                 "displayName","智能验收用户","password","Password123!"),201).path("token").asText();
@@ -132,6 +154,12 @@ class IntelligenceFlowTest {
                         ObjectNode result=JSON.createObjectNode();result.put("category",mode.equals("BAD_CATEGORY") ? "自创分类" : "设备故障");
                         result.put("deviceName","打印机");result.putNull("location");result.put("priority","较急");result.putArray("tags").add("卡纸");
                         result.put("summary","打印机卡纸并伴随异响");if(mode.equals("BAD_TYPE")) result.put("summary",42);
+                        String original=body.path("contents").get(0).path("parts").get(0).path("text").asText();
+                        for(String field : List.of("impactScope","faultStartedAt","errorMessage","attemptedActions")) result.putNull(field);
+                        if(original.contains("今天上午")) {
+                            result.put("impactScope","办公室 5 人");result.put("faultStartedAt","今天上午");
+                            result.put("errorMessage","E03");result.put("attemptedActions","重启后仍卡纸");
+                        }
                         text=mode.equals("BAD_JSON") ? "not-json" : result.toString();
                     }
                     response=Map.of("candidates",List.of(Map.of("finishReason",mode.equals("INCOMPLETE") ? "MAX_TOKENS" : "STOP",

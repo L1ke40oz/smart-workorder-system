@@ -24,22 +24,39 @@
 | POST | `/tickets/{id}/complete` | 接单管理员填写结果并完成 |
 | GET | `/statistics` | 返回当前角色可见范围内的总数、各状态数量和类别数量 |
 
-创建示例：
+手动创建示例（不需要 originalDescription 和 analysisId）：
 
 ```json
 {
   "clientRequestId": "54aa5e9a-a24f-4cf0-9afc-a5c7d05d0a68",
-  "originalDescription": "三楼打印机反复卡纸，并伴有异响。",
   "summary": "打印机频繁卡纸并伴随异响",
   "category": "设备故障",
   "priority": "较急",
   "deviceName": "打印机",
   "location": "三楼",
-  "tags": ["卡纸", "异响"]
+  "tags": ["卡纸", "异响"],
+  "impactScope": "同办公室 5 人",
+  "faultStartedAt": "今天上午",
+  "errorMessage": "E03",
+  "attemptedActions": "重启后仍卡纸"
 }
 ```
 
-通过智能分析创建时额外携带返回的 `analysisId`。该 ID 绑定当前用户和原始描述，30 分钟内有效，仅允许创建一张正式工单。客户端可核对和修正结构化字段；修改原文后应重新分析，或去掉 analysisId 按手动信息提交。`analysisSource` 由后端决定，不能由客户端伪造。
+通过智能分析创建时必须同时携带返回的 `analysisId` 和对应的完整 `originalDescription`。该 ID 绑定当前用户和原始描述，30 分钟内有效，仅允许创建一张正式工单。客户端可核对和修正结构化字段；修改原文后需重新分析，也可切换到手动填写。`analysisSource` 由后端决定，不能由客户端伪造。
+
+手动创建不要求独立原文，缺省 / null / 全空白原文持久化为 null；若旧客户端仍提交非空原文，按输入原样保留。Android 手动模式不发送智能输入框内的草稿及 analysisId，来源为 MANUAL；智能模式来源为 GEMINI。手动详情隐藏空的原始描述区域，不拼接或伪造原文。
+
+| 字段 | 约束 |
+| --- | --- |
+| summary | 必填，最多 120 字符 |
+| category / priority | 必填，固定枚举；Android 提供默认值 |
+| originalDescription | 手动可省略；智能必须与预览一致，最多 5000 字符 |
+| deviceName / location | 选填，各最多 100 字符 |
+| tags | 必传数组，可为空，最多 8 项，每项非空且不超过 24 字符 |
+| impactScope | 选填，最多 100 字符，影响人员或区域 |
+| faultStartedAt | 选填，最多 100 字符，原文中的故障开始时间描述，例如“今天上午”；不是 ISO 时间戳，不等同于管理员接单时间 startedAt |
+| errorMessage | 选填，最多 500 字符，错误提示或错误码 |
+| attemptedActions | 选填，最多 1000 字符，用户已尝试的操作和效果 |
 
 `clientRequestId` 由客户端为本次提交生成。网络失败后的同内容重试复用同一 ID，服务端返回已创建记录；同一标识携带不同内容返回 409。正常创建和幂等重试均返回 201。
 
@@ -66,7 +83,7 @@
 | GET | `/tickets/{id}/suggestions` | 管理员检索历史已完成案例并获取处理参考 |
 | POST | `/knowledge/sync` | 管理员请求异步同步历史工单，202 返回安排信息 |
 
-分析响应：analysisId、originalDescription、result、expiresAt。result 包含 category、deviceName、location、priority、tags、summary，严格校验字段类型、枚举与长度。
+分析响应：analysisId、originalDescription、result、expiresAt。result 包含 category、deviceName、location、priority、tags、summary、impactScope、faultStartedAt、errorMessage、attemptedActions，严格校验字段类型、枚举与长度。全部键必须返回；选填信息未提及则为 null，不编造具体时间，也不把模型建议当成用户已经采取的操作。
 
 RAG 响应包含：
 

@@ -86,6 +86,8 @@ public class WorkorderViewModel extends AndroidViewModel {
             draft.analysisId=p.analysisId;draft.analyzedOriginal=p.originalDescription;draft.originalDescription=p.originalDescription;
             draft.category=p.result.category;draft.priority=p.result.priority;draft.summary=p.result.summary;
             draft.deviceName=p.result.deviceName;draft.location=p.result.location;draft.tags=p.result.tags;
+            draft.impactScope=p.result.impactScope;draft.faultStartedAt=p.result.faultStartedAt;
+            draft.errorMessage=p.result.errorMessage;draft.attemptedActions=p.result.attemptedActions;
             analysisReady.setValue(new Event<>(p));
         });
     }
@@ -97,7 +99,7 @@ public class WorkorderViewModel extends AndroidViewModel {
     public void syncKnowledge() { request(repository.api().syncKnowledge(),knowledgeSync,true,null); }
     public void create() {
         if(submission.getValue()!=null && submission.getValue().loading) return;
-        request(repository.api().create(draft),submission,true,t -> { draft=new Models.Draft(); created.setValue(new Event<>(t)); });
+        request(repository.api().create(draft.forSubmission()),submission,true,t -> { draft=new Models.Draft(); created.setValue(new Event<>(t)); });
     }
     public void start(long id) { mutate(repository.api().start(id)); }
     public void complete(long id,String result) { mutate(repository.api().complete(id,new Models.Complete(result))); }

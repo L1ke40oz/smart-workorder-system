@@ -9,7 +9,7 @@
     <string name="search_hint">搜索摘要或工单编号</string><string name="search">查询</string>
     <string name="next_page">下一页</string><string name="previous_page">上一页</string>
     <string name="description">发生了什么问题？</string><string name="description_hint">例如：办公室三楼的打印机一直卡纸，打印时伴随异响，已经无法使用。</string>
-    <string name="describe_subtitle">尽量写清设备、地点和影响，方便准确处理。</string>
+    <string name="describe_subtitle">描述问题，让系统整理；也可以直接填写工单。</string>
     <string name="analyze">智能整理</string><string name="manual_entry">填写工单信息</string>
     <string name="summary">问题摘要</string><string name="category">工单类别</string><string name="priority">紧急程度</string>
     <string name="device">设备名称（选填）</string><string name="location">故障地点（选填）</string><string name="tags">标签（选填，用逗号分隔）</string>
@@ -19,6 +19,19 @@
     <string name="logout">退出登录</string><string name="retry">重试</string><string name="back">返回</string><string name="cancel">取消</string><string name="ok">确定</string>
     <string name="server_settings">连接设置</string>
     <string name="use_manual">改为手动填写</string>
+    <string name="description_required">发生了什么问题？（必填）</string>
+    <string name="summary_required">问题摘要（必填）</string>
+    <string name="description_missing">请填写故障描述</string>
+    <string name="summary_missing">请填写问题摘要</string>
+    <string name="smart_entry">智能报修</string>
+    <string name="manual_mode">手动填写</string>
+    <string name="review_entry">核对工单信息</string>
+    <string name="fault_context">补充排查线索</string>
+    <string name="fault_context_hint">以下均为选填。只填写你了解的信息，方便管理员排查。</string>
+    <string name="impact_scope">影响范围（如同办公室 5 人）</string>
+    <string name="fault_started_at">故障开始时间（如今天上午）</string>
+    <string name="error_message">错误提示或错误码</string>
+    <string name="attempted_actions">已尝试的操作及效果</string>
     <string name="knowledge_reference">历史案例与处理参考</string>
     <string name="knowledge_explanation">建议仅供排查参考，实际处理结果请自行填写。匹配度表示文本相似程度。</string>
     <string name="find_similar">检索相似案例</string><string name="sync_knowledge">同步已完成工单</string><string name="open_case">查看原工单</string>

@@ -38,9 +38,12 @@ public class TicketService {
         users.lockById(actor.getId()).orElseThrow(() -> new ApiException(401, "账号不存在"));
         Ticket existing = tickets.findByOwnerIdAndRequestKey(actor.getId(), input.clientRequestId().toString()).orElse(null);
         if (existing != null) {
-            if (!existing.originalDescription.equals(input.originalDescription()) || !existing.summary.equals(input.summary().trim())
+            if (!Objects.equals(existing.originalDescription,original(input.originalDescription())) || !existing.summary.equals(input.summary().trim())
                     || !existing.category.equals(input.category()) || !existing.priority.equals(input.priority())
                     || !Objects.equals(existing.deviceName,clean(input.deviceName())) || !Objects.equals(existing.location,clean(input.location()))
+                    || !Objects.equals(existing.impactScope,clean(input.impactScope())) || !Objects.equals(existing.faultStartedAt,clean(input.faultStartedAt()))
+                    || !Objects.equals(existing.errorMessage,clean(input.errorMessage())) || !Objects.equals(existing.attemptedActions,clean(input.attemptedActions()))
+                    || !existing.analysisSource.equals(input.analysisId()==null ? "MANUAL" : "GEMINI")
                     || !existing.tagsJson.equals(write(input.tags()))) {
                 throw new ApiException(409, "本次提交标识已使用，请重新新建工单");
             }
@@ -51,9 +54,11 @@ public class TicketService {
         t.number = "WO" + DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneOffset.ofHours(8)).format(Instant.now())
                 + UUID.randomUUID().toString().replace("-", "").substring(0,16).toUpperCase(Locale.ROOT);
         t.ownerId = actor.getId(); t.requestKey = input.clientRequestId().toString();
-        t.originalDescription = input.originalDescription(); t.summary = input.summary().trim();
+        t.originalDescription = original(input.originalDescription()); t.summary = input.summary().trim();
         t.category = input.category(); t.priority = input.priority(); t.deviceName = clean(input.deviceName());
         t.location = clean(input.location()); t.tagsJson = write(input.tags());
+        t.impactScope=clean(input.impactScope());t.faultStartedAt=clean(input.faultStartedAt());
+        t.errorMessage=clean(input.errorMessage());t.attemptedActions=clean(input.attemptedActions());
         t.analysisSource = input.analysisId()==null ? "MANUAL" : "GEMINI"; t.status = "PENDING";
         t.createdAt = Instant.now(); t.updatedAt = t.createdAt;
         tickets.save(t);analysis.markUsed(input.analysisId(),actor,t.id);return view(t);
@@ -115,6 +120,8 @@ public class TicketService {
     private Specification<Ticket> scope(User actor) { return (r,q,b) -> actor.isAdmin() ? b.conjunction() : b.equal(r.get("ownerId"),actor.getId()); }
     private void requireAdmin(User u) { if (!u.isAdmin()) throw new ApiException(403, "仅管理员可以处理工单"); }
     private String clean(String s) { return s == null || s.isBlank() ? null : s.trim(); }
+    // Keep supplied original text byte-for-byte; a manual ticket may have no original narrative.
+    private String original(String s) { return s == null || s.isBlank() ? null : s; }
     private String write(List<String> tags) {
         try { return json.writeValueAsString(tags); } catch (Exception e) { throw new IllegalStateException(e); }
     }
@@ -125,7 +132,8 @@ public class TicketService {
         String submitter = users.findById(t.ownerId).map(User::getDisplayName).orElse("用户");
         String assignee = t.assignedTo == null ? null : users.findById(t.assignedTo).map(User::getDisplayName).orElse("管理员");
         return new TicketDtos.View(t.id,t.number,t.ownerId,submitter,t.originalDescription,t.summary,t.category,t.priority,
-                t.deviceName,t.location,tags,t.analysisSource,t.status,t.assignedTo,assignee,t.resolution,
+                t.deviceName,t.location,tags,t.impactScope,t.faultStartedAt,t.errorMessage,t.attemptedActions,
+                t.analysisSource,t.status,t.assignedTo,assignee,t.resolution,
                 t.createdAt,t.updatedAt,t.startedAt,t.completedAt);
     }
 }

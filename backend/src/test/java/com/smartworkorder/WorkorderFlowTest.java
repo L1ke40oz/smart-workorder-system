@@ -110,6 +110,35 @@ class WorkorderFlowTest {
         } finally { pool.shutdownNow(); }
     }
 
+    @Test void manualEntryNeedsNoSeparateNarrativeAndSavesFaultContext() throws Exception {
+        String token=register();Map<String,Object> input=ticket();input.remove("originalDescription");
+        input.put("impactScope","办公室 5 人");input.put("faultStartedAt","今天上午");
+        input.put("errorMessage","E03");input.put("attemptedActions","重启后仍卡纸");
+        JsonNode created=perform(post("/api/tickets"),token,input,201);
+        assertThat(created.path("originalDescription").isNull()).isTrue();
+        assertThat(created.path("analysisSource").asText()).isEqualTo("MANUAL");
+        JsonNode detail=perform(get("/api/tickets/"+created.path("id").asLong()),token,null,200);
+        for(String field : List.of("impactScope","faultStartedAt","errorMessage","attemptedActions")) {
+            assertThat(detail.path(field).asText()).isEqualTo(input.get(field));
+        }
+        assertThat(perform(post("/api/tickets"),token,input,201).path("id")).isEqualTo(created.path("id"));
+        input.put("originalDescription","  ");
+        assertThat(perform(post("/api/tickets"),token,input,201).path("id")).isEqualTo(created.path("id"));
+        for(String field : List.of("impactScope","faultStartedAt","errorMessage","attemptedActions")) {
+            Object previous=input.put(field,"不同内容");perform(post("/api/tickets"),token,input,409);input.put(field,previous);
+        }
+    }
+
+    @Test void newContextFieldsAreOptionalButStillValidated() throws Exception {
+        String token=register();Map<String,Object> input=ticket();input.remove("originalDescription");
+        for(var constraint : Map.of("impactScope",100,"faultStartedAt",100,"errorMessage",500,"attemptedActions",1000).entrySet()) {
+            input.put(constraint.getKey(),"x".repeat(constraint.getValue()+1));
+            perform(post("/api/tickets"),token,input,400);input.remove(constraint.getKey());
+        }
+        input.put("summary"," ");perform(post("/api/tickets"),token,input,400);
+        assertThat(perform(get("/api/tickets"),token,null,200).path("total").asLong()).isZero();
+    }
+
     private String register() throws Exception {
         return perform(post("/api/auth/register"),null,Map.of("username","u"+UUID.randomUUID().toString().replace("-","").substring(0,16),
                 "displayName","测试用户","password","Password123!"),201).path("token").asText();

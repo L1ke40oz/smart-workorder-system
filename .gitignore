@@ -20,6 +20,8 @@ local.properties
 .env.*
 !.env.example
 **/application-local.yml
+# Personal account/startup notes stay local.
+/docs/账号*.txt
 /.validation/
 /.idea/
 **/build/

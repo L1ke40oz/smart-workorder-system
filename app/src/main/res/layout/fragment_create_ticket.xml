@@ -1,17 +1,23 @@
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="24dp" android:orientation="vertical">
         <com.google.android.material.button.MaterialButton android:id="@+id/back" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/back" />
         <TextView style="@style/Text.Workorder.Title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/create_ticket" />
         <TextView style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/describe_subtitle" />
-        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:hint="@string/description">
+        <com.google.android.material.button.MaterialButtonToggleGroup android:id="@+id/entryMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" app:singleSelection="true" app:selectionRequired="true" app:checkedButton="@id/smartMode">
+            <com.google.android.material.button.MaterialButton android:id="@+id/smartMode" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="0dp" android:layout_weight="1" android:layout_height="52dp" android:text="@string/smart_entry" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/manualMode" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="0dp" android:layout_weight="1" android:layout_height="52dp" android:text="@string/manual_mode" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+        <LinearLayout android:id="@+id/smartPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <com.google.android.material.textfield.TextInputLayout android:id="@+id/descriptionLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:hint="@string/description_required">
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/description" android:layout_width="match_parent" android:layout_height="wrap_content" android:minLines="5" android:gravity="top" android:inputType="textMultiLine|textCapSentences" android:maxLength="5000" />
         </com.google.android.material.textfield.TextInputLayout>
         <TextView style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/description_hint" />
         <com.google.android.material.button.MaterialButton android:id="@+id/analyze" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginTop="18dp" android:text="@string/analyze" />
+        </LinearLayout>
         <TextView android:id="@+id/sourceNote" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/useManual" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/use_manual" android:visibility="gone" />
-        <TextView style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="26dp" android:text="@string/manual_entry" />
-        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:hint="@string/summary">
+        <LinearLayout android:id="@+id/fieldsPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+        <TextView android:id="@+id/fieldsTitle" style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="26dp" android:text="@string/manual_entry" />
+        <com.google.android.material.textfield.TextInputLayout android:id="@+id/summaryLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:hint="@string/summary_required">
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/summary" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences" android:maxLength="120" />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:hint="@string/category">
@@ -29,7 +35,22 @@
         <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:hint="@string/tags">
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/tags" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" android:maxLength="220" />
         </com.google.android.material.textfield.TextInputLayout>
+        <TextView style="@style/Text.Workorder.Section" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="26dp" android:text="@string/fault_context" />
+        <TextView style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/fault_context_hint" />
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:hint="@string/impact_scope">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/impactScope" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" android:maxLength="100" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:hint="@string/fault_started_at">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/faultStartedAt" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" android:maxLength="100" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:hint="@string/error_message">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/errorMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textMultiLine" android:minLines="2" android:gravity="top" android:maxLength="500" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:hint="@string/attempted_actions">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/attemptedActions" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textMultiLine" android:minLines="3" android:gravity="top" android:maxLength="1000" />
+        </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
         <TextView android:id="@+id/message" style="@style/Text.Workorder.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:accessibilityLiveRegion="polite" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/submit" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="14dp" android:text="@string/confirm_submit" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/submit" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="14dp" android:text="@string/confirm_submit" android:visibility="gone" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

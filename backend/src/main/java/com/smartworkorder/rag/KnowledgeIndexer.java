@@ -42,7 +42,9 @@ public class KnowledgeIndexer {
     }
     public static String queryText(TicketDtos.View t) {
         return "类别："+t.category()+"\n摘要："+t.summary()+"\n设备："+safe(t.deviceName(),100)
-                +"\n故障描述："+safe(t.originalDescription(),1000);
+                +"\n故障描述："+safe(t.originalDescription(),1000)+"\n影响范围："+safe(t.impactScope(),100)
+                +"\n故障开始时间："+safe(t.faultStartedAt(),100)+"\n错误提示："+safe(t.errorMessage(),500)
+                +"\n已尝试操作："+safe(t.attemptedActions(),500);
     }
     public static String caseText(TicketDtos.View t) { return queryText(t)+"\n实际解决方案："+safe(t.resolution(),800); }
     private static String safe(String s,int limit) { return s==null ? "" : s.substring(0,Math.min(s.length(),limit)); }

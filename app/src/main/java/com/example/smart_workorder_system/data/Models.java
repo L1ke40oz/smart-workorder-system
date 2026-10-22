@@ -29,6 +29,7 @@ public final class Models {
         public long id, ownerId;
         public Long assignedTo;
         public String number, submitterName, originalDescription, summary, category, priority, deviceName, location;
+        public String impactScope, faultStartedAt, errorMessage, attemptedActions;
         public String analysisSource, status, assigneeName, resolution, createdAt, updatedAt, startedAt, completedAt;
         public List<String> tags = new ArrayList<>();
     }
@@ -47,6 +48,16 @@ public final class Models {
         public List<String> tags = new ArrayList<>();
         public String analysisId;
         public transient String analyzedOriginal;
+        public transient boolean manualEntry;
+        public String impactScope="", faultStartedAt="", errorMessage="", attemptedActions="";
+        public Draft forSubmission() {
+            Draft input=new Draft();input.clientRequestId=clientRequestId;
+            input.originalDescription=manualEntry ? null : originalDescription;
+            input.analysisId=manualEntry ? null : analysisId;
+            input.summary=summary;input.category=category;input.priority=priority;input.deviceName=deviceName;input.location=location;
+            input.tags=new ArrayList<>(tags);input.impactScope=impactScope;input.faultStartedAt=faultStartedAt;
+            input.errorMessage=errorMessage;input.attemptedActions=attemptedActions;return input;
+        }
     }
     public static class Capabilities { public boolean analysis, rag; }
     public static class AnalysisInput {
@@ -55,6 +66,7 @@ public final class Models {
     }
     public static class AnalysisResult {
         public String category, deviceName, location, priority, summary;
+        public String impactScope, faultStartedAt, errorMessage, attemptedActions;
         public List<String> tags;
     }
     public static class AnalysisPreview {

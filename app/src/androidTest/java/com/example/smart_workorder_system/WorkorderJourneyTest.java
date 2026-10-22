@@ -23,7 +23,9 @@ public class WorkorderJourneyTest {
     @Test public void userSubmitsAdminProcessesUserSeesResult() throws Exception {
         String username="ui_"+System.currentTimeMillis();
         String title="打印机卡纸与异响（验收"+(System.currentTimeMillis()%10000)+"）";
-        InstrumentationRegistry.getInstrumentation().getTargetContext().getSharedPreferences("session",0).edit().clear().commit();
+        String apiBaseUrl=InstrumentationRegistry.getArguments().getString("apiBaseUrl",BuildConfig.API_BASE_URL);
+        InstrumentationRegistry.getInstrumentation().getTargetContext().getSharedPreferences("session",0).edit()
+                .clear().putString("baseUrl",apiBaseUrl).commit();
         try(ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)) {
             waitFor(withId(R.id.toggleMode));
             onView(withId(R.id.toggleMode)).perform(scrollTo(),click());
@@ -33,13 +35,21 @@ public class WorkorderJourneyTest {
             onView(withId(R.id.submit)).perform(scrollTo(),click());
             waitFor(withText("你好，验收用户"));screenshot("02-user-dashboard");
             onView(withId(R.id.primaryAction)).perform(scrollTo(),click());
-            onView(withId(R.id.description)).perform(scrollTo(),replaceText("办公室三楼打印机反复卡纸，并伴有异响，无法正常使用。"),closeSoftKeyboard());
+            onView(withId(R.id.manualMode)).perform(scrollTo(),click());
             onView(withId(R.id.summary)).perform(scrollTo(),replaceText(title),closeSoftKeyboard());
             onView(withId(R.id.location)).perform(scrollTo(),replaceText("办公室三楼"),closeSoftKeyboard());
             onView(withId(R.id.device)).perform(scrollTo(),replaceText("打印机"),closeSoftKeyboard());
+            onView(withId(R.id.impactScope)).perform(scrollTo(),replaceText("同办公室 5 人"),closeSoftKeyboard());
+            onView(withId(R.id.faultStartedAt)).perform(scrollTo(),replaceText("今天上午"),closeSoftKeyboard());
+            onView(withId(R.id.errorMessage)).perform(scrollTo(),replaceText("E03"),closeSoftKeyboard());
+            onView(withId(R.id.attemptedActions)).perform(scrollTo(),replaceText("重启后仍卡纸"),closeSoftKeyboard());
             onView(withId(R.id.submit)).perform(scrollTo(),click());
             onView(withId(android.R.id.button1)).perform(click());
-            waitFor(withId(R.id.original));onView(withId(R.id.original)).check(matches(withText(containsString("反复卡纸"))));
+            waitFor(withId(R.id.structured));
+            onView(withId(R.id.structured)).perform(scrollTo()).check(matches(withText(containsString("同办公室 5 人"))))
+                    .check(matches(withText(containsString("今天上午")))).check(matches(withText(containsString("E03"))))
+                    .check(matches(withText(containsString("重启后仍卡纸")))).check(matches(withText(containsString("手动填写"))));
+            onView(withId(R.id.original)).check(matches(withEffectiveVisibility(Visibility.GONE)));
             screenshot("03-ticket-detail");pressBack();
             logout();login("admin","Admin123456!");waitFor(withText("服务工作台"));screenshot("04-admin-dashboard");
             onView(withId(R.id.primaryAction)).perform(scrollTo(),click());
